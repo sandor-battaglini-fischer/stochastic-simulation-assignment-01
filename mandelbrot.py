@@ -21,7 +21,7 @@ def mandelbrot_set(xmin, xmax, ymin, ymax, width, height, max_iter):
     return (r1, r2, n3)
 
 def plot_mandelbrot(xmin, xmax, ymin, ymax, width=10, height=10, max_iter=256):
-    dpi = 80
+    dpi = 300
     img_width = dpi * width
     img_height = dpi * height
     x, y, z = mandelbrot_set(xmin, xmax, ymin, ymax, img_width, img_height, max_iter)
