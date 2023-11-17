@@ -55,6 +55,53 @@ def calculate_area(xmin, xmax, ymin, ymax, z, max_iter):
     proportion = np.sum(in_set) / z.size
     return proportion * (xmax - xmin) * (ymax - ymin)
 
+  
+def random_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
+    """Sample the Mandelbrot set using random sampling."""
+    rng = np.random.default_rng()
+    x_samples = rng.random(n_samples) * (xmax - xmin) + xmin
+    y_samples = rng.random(n_samples) * (ymax - ymin) + ymin
+    z = np.array([mandelbrot(x + 1j*y, max_iter) for x, y in zip(x_samples, y_samples)])
+    area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
+    return x_samples, y_samples, z, area
+
+def antithetic_random_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
+    rng = random.default_rng()
+    x_samples = rng.random(n_samples // 2) * (xmax - xmin) + xmin
+    y_samples = rng.random(n_samples // 2) * (ymax - ymin) + ymin
+    y_samples_anti = ymax + ymin - y_samples
+    x_samples = np.concatenate((x_samples, x_samples))
+    y_samples = np.concatenate((y_samples, y_samples_anti))
+    z = np.empty(n_samples)
+    for i in range(n_samples):
+        x = x_samples[i]
+        y = y_samples[i]
+        z[i] = mandelbrot(x + 1j*y, max_iter)
+    area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
+    return x_samples, y_samples, z, area
+
+def latin_sampling_scipy(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
+    """Sample the Mandelbrot set using Latin hypercube sampling."""
+    sampler = LatinHypercube(d=2)
+    sample = sampler.random(n=n_samples)
+    x_samples = sample[:, 0] * (xmax - xmin) + xmin
+    y_samples = sample[:, 1] * (ymax - ymin) + ymin
+    z = np.array([mandelbrot(x + 1j*y, max_iter) for x, y in zip(x_samples, y_samples)])
+    area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
+    return x_samples, y_samples, z, area
+
+def antithetic_latin_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
+    sampler = LatinHypercube(d=2)
+    sample = sampler.random(n=n_samples//2)
+    x_sample_nonanti = sample[:, 0] * (xmax - xmin) + xmin
+    x_samples = np.concatenate((x_sample_nonanti, x_sample_nonanti))
+    y_samples_nonanti = sample[:, 1] * (ymax - ymin) + ymin
+    y_samples = np.concatenate((y_samples_nonanti, - y_samples_nonanti))
+    z = np.array([mandelbrot(x + 1j*y, max_iter) for x, y in zip(x_samples, y_samples)])
+    area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
+    return x_samples, y_samples, z, area
+
+
 
 def orthogonal_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
     """Sample the Mandelbrot set using orthogonal sampling."""
