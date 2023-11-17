@@ -55,6 +55,20 @@ def calculate_area(xmin, xmax, ymin, ymax, z, max_iter):
     proportion = np.sum(in_set) / z.size
     return proportion * (xmax - xmin) * (ymax - ymin)
 
+def iterator(xmin, xmax, ymin, ymax, n_samples, max_iter):
+    plt.figure(figsize=(10, 10))
+    iterange = range(0, max_iter)
+    areas = np.empty(len(iterange))
+    for i in iterange:
+        areas[i] = random_sampling(xmin, xmax, ymin, ymax, n_samples, i)
+    plt.plot(iterange, areas - areas[-1])
+    plt.xlabel("Iterations")
+    plt.yscale("linear")
+    plt.ylim(-0.5, 2)
+    plt.ylabel("Area Convergence")
+    plt.grid()
+    plt.savefig("Mandelbrot area convergence through iterations")
+
   
 def random_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
     """Sample the Mandelbrot set using random sampling."""

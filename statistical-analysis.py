@@ -89,3 +89,6 @@ with open('sampling_results.csv', 'w', newline='') as file:
         # Write summary statistics to CSV
         writer.writerow([method, mean_val, var_val, std_val, conf_interval, avg_time])
         print(f"{method}: Mean Area = {mean_val:.4f}, Variance = {var_val:.4f}, STD = {std_val:.4f}, 95% CI = {conf_interval}, Average Time = {avg_time:.4f} seconds")
+
+
+
