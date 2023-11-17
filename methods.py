@@ -55,7 +55,7 @@ def calculate_area(xmin, xmax, ymin, ymax, z, max_iter):
     proportion = np.sum(in_set) / z.size
     return proportion * (xmax - xmin) * (ymax - ymin)
 
-
+  
 def random_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
     """Sample the Mandelbrot set using random sampling."""
     rng = np.random.default_rng()
@@ -100,6 +100,7 @@ def antithetic_latin_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
     z = np.array([mandelbrot(x + 1j*y, max_iter) for x, y in zip(x_samples, y_samples)])
     area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
     return x_samples, y_samples, z, area
+
 
 
 def orthogonal_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
