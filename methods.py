@@ -4,9 +4,10 @@ import matplotlib.pyplot as plt
 from scipy.stats.qmc import LatinHypercube
 import time
 import os
+from numba import jit
 
 
-
+@jit
 def mandelbrot(c, max_iter):
     """
     Calculate the Mandelbrot set iteration count for a given complex number.
@@ -27,6 +28,7 @@ def mandelbrot(c, max_iter):
         return max_iter
     return n + 1 - np.log(np.log2(abs(z)))
 
+@jit
 def mandelbrot_set(xmin, xmax, ymin, ymax, width, height, max_iter):
     """
     Generate a grid representation of the Mandelbrot set.
@@ -49,6 +51,7 @@ def mandelbrot_set(xmin, xmax, ymin, ymax, width, height, max_iter):
             n3[i, j] = mandelbrot(r1[i] + 1j*r2[j], max_iter)
     return (r1, r2, n3)
 
+@jit
 def calculate_area(xmin, xmax, ymin, ymax, z, max_iter):
     """Calculate the area of the Mandelbrot set."""
     in_set = z == max_iter
@@ -114,6 +117,69 @@ def antithetic_latin_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
     z = np.array([mandelbrot(x + 1j*y, max_iter) for x, y in zip(x_samples, y_samples)])
     area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
     return x_samples, y_samples, z, area
+
+
+@jit
+def random_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
+    """Sample the Mandelbrot set using random sampling."""
+    rng = np.random.default_rng()
+    x_samples = rng.random(n_samples) * (xmax - xmin) + xmin
+    y_samples = rng.random(n_samples) * (ymax - ymin) + ymin
+    z = np.array([mandelbrot(x + 1j*y, max_iter) for x, y in zip(x_samples, y_samples)])
+    area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
+    return x_samples, y_samples, z, area
+
+@jit
+def latin_sampling_scipy(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
+    """Sample the Mandelbrot set using Latin hypercube sampling."""
+    sampler = LatinHypercube(d=2)
+    sample = sampler.random(n=n_samples)
+    x_samples = sample[:, 0] * (xmax - xmin) + xmin
+    y_samples = sample[:, 1] * (ymax - ymin) + ymin
+    z = np.array([mandelbrot(x + 1j*y, max_iter) for x, y in zip(x_samples, y_samples)])
+    area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
+    return x_samples, y_samples, z, area
+
+@jit
+def orthogonal_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
+    """Sample the Mandelbrot set using orthogonal sampling."""
+    grid_size = int(np.sqrt(n_samples))
+    actual_n_samples = grid_size**2
+    # if grid_size**2 != n_samples:
+    #     raise ValueError("n_samples must be a perfect square for orthogonal sampling.")
+
+    x_step = (xmax - xmin) / grid_size
+    y_step = (ymax - ymin) / grid_size
+
+    x_samples = []
+    y_samples = []
+    z = []
+
+    x_set = set()
+    y_set = set()
+
+    for i in range(grid_size):
+        for j in range(grid_size):
+            x_rand = xmin + i * x_step + np.random.uniform(0, x_step)
+            while x_rand in x_set:
+                x_rand = xmin + i * x_step + np.random.uniform(0, x_step)
+
+            y_rand = ymin + j * y_step + np.random.uniform(0, y_step)
+            while y_rand in y_set:
+                y_rand = ymin + j * y_step + np.random.uniform(0, y_step)
+
+            x_samples.append(x_rand)
+            y_samples.append(y_rand)
+            z.append(mandelbrot(x_rand + 1j*y_rand, max_iter))
+
+            x_set.add(x_rand)
+            y_set.add(y_rand)
+
+    z = np.array(z)
+    area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
+    return np.array(x_samples), np.array(y_samples), z, area
+
+
 
 
 
@@ -203,11 +269,8 @@ def main():
 
     methods = {
         'Random Sampling': random_sampling,
-        'Antithetic Random Sampling': antithetic_random_sampling,
         'Latin Hypercube Sampling': latin_sampling_scipy,
-        'Antithetic Latin Sampling': antithetic_latin_sampling,
         'Orthogonal Sampling': orthogonal_sampling,
-        'Orthogonal Sampling with Antithetic Variates': orthogonal_sampling_antithetic
     }
 
     # Iterate through each sampling method and visualize the results
