@@ -7,7 +7,7 @@ import os
 from numba import jit
 
 
-@jit
+# @jit
 def mandelbrot(c, max_iter):
     """
     Calculate the Mandelbrot set iteration count for a given complex number.
@@ -28,7 +28,7 @@ def mandelbrot(c, max_iter):
         return max_iter
     return n + 1 - np.log(np.log2(abs(z)))
 
-@jit
+# @jit
 def mandelbrot_set(xmin, xmax, ymin, ymax, width, height, max_iter):
     """
     Generate a grid representation of the Mandelbrot set.
@@ -51,7 +51,7 @@ def mandelbrot_set(xmin, xmax, ymin, ymax, width, height, max_iter):
             n3[i, j] = mandelbrot(r1[i] + 1j*r2[j], max_iter)
     return (r1, r2, n3)
 
-@jit
+# @jit
 def calculate_area(xmin, xmax, ymin, ymax, z, max_iter):
     """Calculate the area of the Mandelbrot set."""
     in_set = z == max_iter
@@ -60,7 +60,7 @@ def calculate_area(xmin, xmax, ymin, ymax, z, max_iter):
 
 
 
-@jit
+# @jit
 def random_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
     """Sample the Mandelbrot set using random sampling."""
     rng = np.random.default_rng()
@@ -70,7 +70,7 @@ def random_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
     area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
     return x_samples, y_samples, z, area
 
-@jit
+# @jit
 def latin_sampling_scipy(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
     """Sample the Mandelbrot set using Latin hypercube sampling."""
     sampler = LatinHypercube(d=2)
@@ -81,12 +81,13 @@ def latin_sampling_scipy(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
     area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
     return x_samples, y_samples, z, area
 
-@jit
+# @jit
 def orthogonal_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
     """Sample the Mandelbrot set using orthogonal sampling."""
     grid_size = int(np.sqrt(n_samples))
-    if grid_size**2 != n_samples:
-        raise ValueError("n_samples must be a perfect square for orthogonal sampling.")
+    actual_n_samples = grid_size**2
+    # if grid_size**2 != n_samples:
+    #     raise ValueError("n_samples must be a perfect square for orthogonal sampling.")
 
     x_step = (xmax - xmin) / grid_size
     y_step = (ymax - ymin) / grid_size
