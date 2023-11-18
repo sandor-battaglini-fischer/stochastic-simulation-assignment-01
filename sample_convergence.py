@@ -5,7 +5,7 @@ import csv
 import matplotlib.pyplot as plt
 import seaborn as sns
 from methods import random_sampling, latin_sampling_scipy as LHS, orthogonal_sampling
-from antithetic import antithetic_random_sampling as ARS, antithetic_latin_sampling as ALS, antithetic_orthogonal_sampling as AOS
+# from antithetic import antithetic_random_sampling as ARS, antithetic_latin_sampling as ALS, antithetic_orthogonal_sampling as AOS
 from methods import xmax, xmin, ymax, ymin, n_samples, max_iter
 import time
 
@@ -97,7 +97,7 @@ def plot_time_per_simulation(xmin, xmax, ymin, ymax, max_iter, simulations=10, c
         'Orthogonal Sampling': orthogonal_sampling
     }
 
-    sample_sizes = np.logspace(2, 6, num=10, base=10, dtype=int)
+    sample_sizes = np.logspace(2, 4, num=100, base=10, dtype=int)
 
     plt.figure(figsize=(12, 8))
 
@@ -112,20 +112,22 @@ def plot_time_per_simulation(xmin, xmax, ymin, ymax, max_iter, simulations=10, c
             avg_time = (end_time - start_time) / simulations
             avg_times.append(avg_time)
 
-        plt.plot(sample_sizes, avg_times, marker='o', color=colors[i % len(colors)], label=method_name)
+        plt.plot(sample_sizes, avg_times, color=colors[i % len(colors)], label=method_name)
 
     # plt.xscale('log')
     # plt.yscale('log')
-    plt.xlabel('Number of Samples', fontsize=14)
-    plt.ylabel('Average Time per Simulation', fontsize=14)
-    plt.title('Average Time per Simulation vs. Number of Samples', fontsize=16)
-    plt.legend()
+    plt.xlabel('Number of Samples', fontsize=16)
+    plt.ylabel('Average Time per Simulation', fontsize=16)
+    plt.title('Average Time per Simulation vs. Number of Samples (@1000 iterations)', fontsize=18)
+    plt.legend(fontsize=16)
+    plt.xticks(fontsize=16)
+    plt.yticks(fontsize=16)
     plt.grid(True)
     plt.savefig('time_per_simulation_plot.png', dpi=300)
     plt.show()
 
 xmin, xmax, ymin, ymax = -2.0, 1.0, -1.5, 1.5
-max_iter = 256
-max_samples = 10000
+max_iter = 1000
+max_samples = 1000000
 # plot_convergence(xmin, xmax, ymin, ymax, max_iter, max_samples)
 plot_time_per_simulation(xmin, xmax, ymin, ymax, max_iter)
