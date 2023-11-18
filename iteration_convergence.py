@@ -34,7 +34,7 @@ sns.set(style="whitegrid")
 colors = sns.color_palette("pastel")
 
 
-def plot_convergence_iterations(xmin, xmax, ymin, ymax, n_samples, iteration_steps, simulations=10, p_value=0.95, colors=None):
+def plot_convergence_iterations(xmin, xmax, ymin, ymax, n_samples, iteration_steps, simulations=30, conf_level=0.95, colors=None):
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "font.serif": ["Palatino"]})
 
 
@@ -63,7 +63,7 @@ def plot_convergence_iterations(xmin, xmax, ymin, ymax, n_samples, iteration_ste
 
             mean_area = np.mean(areas)
             var_area = np.var(areas, ddof=1)
-            conf_int_low, conf_int_high = map(float, conf_int(mean_area, var_area, simulations, p=p_value)[1:-1].split(', '))
+            conf_int_low, conf_int_high = map(float, conf_int(mean_area, var_area, simulations, p=conf_level)[1:-1].split(', '))
 
             mean_areas.append(mean_area)
             conf_intervals.append((conf_int_low, conf_int_high))
