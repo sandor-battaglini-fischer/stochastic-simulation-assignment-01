@@ -1,5 +1,10 @@
 import numpy as np
+import pandas as pd
 import scipy.stats as st
+from scipy.stats import f, levene
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+from statsmodels.stats.anova import AnovaRM
 import math
 import csv
 import time
@@ -30,8 +35,8 @@ def conf_int(mean, var, n, p=0.95):
     return f"[{min_lambda:.4f}, {plus_lambda:.4f}]"
 
 # Simulation parameters
-simulations = 100
-p_value = 0.95
+simulations = 50
+conf_level = 0.95
 
 results = {
     "Random Sampling": [],
@@ -85,8 +90,42 @@ with open('sampling_results.csv', 'w', newline='') as file:
         var_val = np.var(values)
         std_val = np.std(values)
         avg_time = np.mean(timings[method])
-        conf_interval = conf_int(mean_val, var_val, simulations, p=p_value)
+        conf_interval = conf_int(mean_val, var_val, simulations, p=conf_level)
 
         # Write summary statistics to CSV
         writer.writerow([method, mean_val, var_val, std_val, conf_interval, avg_time])
         print(f"{method}: Mean Area = {mean_val:.4f}, Variance = {var_val:.4f}, STD = {std_val:.4f}, 95% CI = {conf_interval}, Average Time = {avg_time:.4f} seconds")
+
+    # Perform Levene's test for homogeneity of variance
+    areas_test_random = results['Random Sampling']
+    areas_test_lhs = results['LHS']
+    areas_test_orthogonal = results['Orthogonal Sampling']
+    levene_value, levene_p = levene(areas_test_random, areas_test_lhs, areas_test_orthogonal)
+    writer.writerow([])
+    writer.writerow(['Levene\'s test for homogeneity of variance:'])
+    writer.writerow(['Levene\'s value', levene_value, 'p value:', levene_p])
+
+    #Perform Welsh's ANOVA for difference of means
+    data = {
+    'Area': areas_test_random + areas_test_lhs + areas_test_orthogonal,
+    'Method': ['Random Sampling']*len(areas_test_random) + ['LHS']*len(areas_test_lhs) + ['Orthogonal Sampling']*len(areas_test_orthogonal)
+    }
+    data = pd.DataFrame(data)
+    model = ols('Area ~ C(Method)', data=data).fit()
+    ANOVA_results = sm.stats.anova_lm(model, typ=2)
+
+    writer.writerow([])
+    writer.writerow(['Welsh\'s ANOVA:'])
+    writer.writerow([ANOVA_results.to_string()])
+
+    #Perform F-test for Orthogonal Sampling with Antithetic Variates
+    var_ortho = np.var(areas_test_orthogonal)
+    var_ortho_anti = np.var(results['Antithetic Orthogonal Sampling'])
+    F = var_ortho / var_ortho_anti
+    dfn = len(areas_test_orthogonal) - 1
+    dfd = len(results['Antithetic Orthogonal Sampling']) - 1
+    p_value = f.sf(F, dfn, dfd)
+
+    writer.writerow([])
+    writer.writerow(['F-test for Orthogonal Sampling with Antithetic Variates:'])
+    writer.writerow(['F value:', F, 'p value:', p_value])

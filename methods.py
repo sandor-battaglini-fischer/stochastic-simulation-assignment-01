@@ -258,7 +258,7 @@ def orthogonal_sampling_antithetic(xmin, xmax, ymin, ymax, n_samples, max_iter=2
 
 # Sampling configurations
 xmin, xmax, ymin, ymax = -2.0, 1.0, -1.5, 1.5
-n_samples = 1000000
+n_samples = 10000
 max_iter = 256
 width, height = 800, 800
 
