@@ -4,7 +4,8 @@ import math
 import csv
 import time
 
-from methods import random_sampling, latin_sampling_scipy as LHS, antithetic_latin_sampling as ALS, orthogonal_sampling, antithetic_random_sampling as ARS, orthogonal_sampling_antithetic as OSA
+from methods import random_sampling, latin_sampling_scipy as LHS, orthogonal_sampling
+from antithetic import antithetic_random_sampling as ARS, antithetic_latin_sampling as ALS, antithetic_orthogonal_sampling as AOS
 from methods import xmax, xmin, ymax, ymin, n_samples, max_iter
 
 def conf_int(mean, var, n, p=0.95):
@@ -29,7 +30,7 @@ def conf_int(mean, var, n, p=0.95):
     return f"[{min_lambda:.4f}, {plus_lambda:.4f}]"
 
 # Simulation parameters
-simulations = 10
+simulations = 100
 p_value = 0.95
 
 results = {
@@ -62,7 +63,7 @@ with open('sampling_results.csv', 'w', newline='') as file:
             ("LHS", LHS),
             ("Antithetic Latin Sampling", ALS),
             ("Orthogonal Sampling", orthogonal_sampling),
-            ("Antithetic Orthogonal Sampling", OSA)
+            ("Antithetic Orthogonal Sampling", AOS)
         ]:
             start_time = time.time()
             *_, sampled_area = method_function(xmin, xmax, ymin, ymax, n_samples, max_iter)

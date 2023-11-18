@@ -61,66 +61,67 @@ def calculate_area(xmin, xmax, ymin, ymax, z, max_iter):
 
 
 @jit
-def random_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
-    """Sample the Mandelbrot set using random sampling."""
-    rng = np.random.default_rng()
-    x_samples = rng.random(n_samples) * (xmax - xmin) + xmin
-    y_samples = rng.random(n_samples) * (ymax - ymin) + ymin
-    z = np.array([mandelbrot(x + 1j*y, max_iter) for x, y in zip(x_samples, y_samples)])
+def antithetic_random_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
+    rng = random.default_rng()
+    x_samples = rng.random(n_samples // 2) * (xmax - xmin) + xmin
+    y_samples = rng.random(n_samples // 2) * (ymax - ymin) + ymin
+    y_samples_anti = ymax + ymin - y_samples
+    x_samples = np.concatenate((x_samples, x_samples))
+    y_samples = np.concatenate((y_samples, y_samples_anti))
+    z = np.empty(n_samples)
+    for i in range(n_samples):
+        x = x_samples[i]
+        y = y_samples[i]
+        z[i] = mandelbrot(x + 1j*y, max_iter)
     area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
     return x_samples, y_samples, z, area
 
 @jit
-def latin_sampling_scipy(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
-    """Sample the Mandelbrot set using Latin hypercube sampling."""
+def antithetic_latin_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
     sampler = LatinHypercube(d=2)
-    sample = sampler.random(n=n_samples)
-    x_samples = sample[:, 0] * (xmax - xmin) + xmin
-    y_samples = sample[:, 1] * (ymax - ymin) + ymin
+    sample = sampler.random(n=n_samples//2)
+    x_sample_nonanti = sample[:, 0] * (xmax - xmin) + xmin
+    x_samples = np.concatenate((x_sample_nonanti, x_sample_nonanti))
+    y_samples_nonanti = sample[:, 1] * (ymax - ymin) + ymin
+    y_samples = np.concatenate((y_samples_nonanti, - y_samples_nonanti))
     z = np.array([mandelbrot(x + 1j*y, max_iter) for x, y in zip(x_samples, y_samples)])
     area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
     return x_samples, y_samples, z, area
 
 @jit
-def orthogonal_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
-    """Sample the Mandelbrot set using orthogonal sampling."""
-    grid_size = int(np.sqrt(n_samples))
-    if grid_size**2 != n_samples:
-        raise ValueError("n_samples must be a perfect square for orthogonal sampling.")
+def antithetic_orthogonal_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
+    # Calculate grid size for antithetic sampling
+    grid_size = int(np.sqrt(n_samples / 2))
+    actual_n_samples = grid_size**2 * 2  # Actual number of samples used
 
     x_step = (xmax - xmin) / grid_size
     y_step = (ymax - ymin) / grid_size
+    y_mid = (ymin + ymax) / 2
 
     x_samples = []
     y_samples = []
     z = []
 
-    x_set = set()
-    y_set = set()
-
     for i in range(grid_size):
         for j in range(grid_size):
+            # Sample a point
             x_rand = xmin + i * x_step + np.random.uniform(0, x_step)
-            while x_rand in x_set:
-                x_rand = xmin + i * x_step + np.random.uniform(0, x_step)
-
             y_rand = ymin + j * y_step + np.random.uniform(0, y_step)
-            while y_rand in y_set:
-                y_rand = ymin + j * y_step + np.random.uniform(0, y_step)
 
+            # Store the original point and its evaluation
             x_samples.append(x_rand)
             y_samples.append(y_rand)
             z.append(mandelbrot(x_rand + 1j*y_rand, max_iter))
 
-            x_set.add(x_rand)
-            y_set.add(y_rand)
+            # Mirror the point
+            y_mirror = y_mid - (y_rand - y_mid)
+            x_samples.append(x_rand)
+            y_samples.append(y_mirror)
+            z.append(mandelbrot(x_rand + 1j*y_mirror, max_iter))
 
     z = np.array(z)
     area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
     return np.array(x_samples), np.array(y_samples), z, area
-
-
-
 
 
 # Sampling configurations
@@ -135,9 +136,9 @@ def main():
     os.makedirs(directory_path, exist_ok=True)
 
     methods = {
-        'Random Sampling': random_sampling,
-        'Latin Hypercube Sampling': latin_sampling_scipy,
-        'Orthogonal Sampling': orthogonal_sampling,
+        'Antithetic Random Sampling': antithetic_random_sampling,
+        'Antithetic Latin Sampling': antithetic_latin_sampling,
+        'Antithetic Orthogonal Sampling': antithetic_orthogonal_sampling
     }
 
     # Iterate through each sampling method and visualize the results
