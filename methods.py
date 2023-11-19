@@ -120,82 +120,6 @@ def orthogonal_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
     return np.array(x_samples), np.array(y_samples), z, area
 
 
-
-
-
-def orthogonal_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
-    """Sample the Mandelbrot set using orthogonal sampling."""
-    grid_size = int(np.sqrt(n_samples))
-    if grid_size**2 != n_samples:
-        raise ValueError("n_samples must be a perfect square for orthogonal sampling.")
-
-    x_step = (xmax - xmin) / grid_size
-    y_step = (ymax - ymin) / grid_size
-
-    x_samples = []
-    y_samples = []
-    z = []
-
-    x_set = set()
-    y_set = set()
-
-    for i in range(grid_size):
-        for j in range(grid_size):
-            # Sample a point and insure uniqueness
-            x_rand = xmin + i * x_step + np.random.uniform(0, x_step)
-            while x_rand in x_set:
-                x_rand = xmin + i * x_step + np.random.uniform(0, x_step)
-
-            y_rand = ymin + j * y_step + np.random.uniform(0, y_step)
-            while y_rand in y_set:
-                y_rand = ymin + j * y_step + np.random.uniform(0, y_step)
-
-            x_samples.append(x_rand)
-            y_samples.append(y_rand)
-            z.append(mandelbrot(x_rand + 1j*y_rand, max_iter))
-
-            x_set.add(x_rand)
-            y_set.add(y_rand)
-
-    z = np.array(z)
-    area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
-    return np.array(x_samples), np.array(y_samples), z, area
-
-def orthogonal_sampling_antithetic(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
-    """Sample the Mandelbrot set using orthogonal sampling with antithetic variates."""
-    # Adjust n_samples to be a perfect square
-    grid_size = int(np.sqrt(n_samples))
-    n_samples_adjusted = grid_size**2
-
-    x_step = (xmax - xmin) / grid_size
-    y_mid = (ymin + ymax) / 2
-    y_step = (ymax - y_mid) / grid_size 
-
-    x_samples = []
-    y_samples = []
-    z = []
-
-    for i in range(grid_size):
-        for j in range(grid_size):
-            # Sample a point in the top half
-            x_rand = xmin + i * x_step + np.random.uniform(0, x_step)
-            y_rand = y_mid + j * y_step + np.random.uniform(0, y_step)
-
-            # Store the original point and its evaluation
-            x_samples.append(x_rand)
-            y_samples.append(y_rand)
-            z.append(mandelbrot(x_rand + 1j*y_rand, max_iter))
-
-            # Mirror the point to the bottom half
-            y_mirror = y_mid - (y_rand - y_mid)
-            x_samples.append(x_rand)
-            y_samples.append(y_mirror)
-            z.append(mandelbrot(x_rand + 1j*y_mirror, max_iter))
-
-    z = np.array(z)
-    area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
-    return np.array(x_samples), np.array(y_samples), z, area
-
 # Sampling configurations
 xmin, xmax, ymin, ymax = -2.0, 1.0, -1.5, 1.5
 n_samples = 10000
@@ -203,6 +127,14 @@ max_iter = 256
 width, height = 800, 800
 
 def main():
+    """
+    Main function to visualize the different sampling methods on the.
+
+    This function creates a directory to store images, iterates through each sampling method,
+    visualizes the results, measures the time taken by each method, and saves the images.
+    
+    """
+    
     # Create directory to store images
     directory_path = "/Users/sandor/dev/Computational Science/stochastic-simulation/stochastic-simulation-assignment-01/images"
     os.makedirs(directory_path, exist_ok=True)
