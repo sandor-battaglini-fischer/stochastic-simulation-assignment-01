@@ -28,13 +28,14 @@ def mandelbrot(c, max_iter):
         return max_iter
     return n + 1 - np.log(np.log2(abs(z)))
 
+
 @jit
 def mandelbrot_set(xmin, xmax, ymin, ymax, width, height, max_iter):
     """
     Generate a grid representation of the Mandelbrot set.
 
     Parameters:
-    xmin, xmax, ymin, ymax (float): Coordinates defining the viewport of the Mandelbrot set.
+    xmin, xmax, ymin, ymax: Coordinates of the viewport.
     width, height (int): Dimensions of the grid.
     max_iter (int): Maximum number of iterations for Mandelbrot calculation.
 
@@ -50,6 +51,7 @@ def mandelbrot_set(xmin, xmax, ymin, ymax, width, height, max_iter):
         for j in range(height):
             n3[i, j] = mandelbrot(r1[i] + 1j*r2[j], max_iter)
     return (r1, r2, n3)
+
 
 @jit
 def calculate_area(xmin, xmax, ymin, ymax, z, max_iter):
@@ -69,6 +71,7 @@ def random_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
     area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
     return x_samples, y_samples, z, area
 
+
 @jit
 def latin_sampling_scipy(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
     """Sample the Mandelbrot set using Latin hypercube sampling."""
@@ -79,6 +82,7 @@ def latin_sampling_scipy(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
     z = np.array([mandelbrot(x + 1j*y, max_iter) for x, y in zip(x_samples, y_samples)])
     area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
     return x_samples, y_samples, z, area
+
 
 @jit
 def orthogonal_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
@@ -126,15 +130,16 @@ n_samples = 10000
 max_iter = 256
 width, height = 800, 800
 
+
 def main():
     """
     Main function to visualize the different sampling methods on the.
 
     This function creates a directory to store images, iterates through each sampling method,
     visualizes the results, measures the time taken by each method, and saves the images.
-    
+
     """
-    
+
     # Create directory to store images
     directory_path = "/Users/sandor/dev/Computational Science/stochastic-simulation/stochastic-simulation-assignment-01/images"
     os.makedirs(directory_path, exist_ok=True)
