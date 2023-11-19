@@ -19,7 +19,7 @@ def conf_int(mean, var, n, p=0.95):
     p (float): Confidence level (default is 0.95 for 95%).
 
     Returns:
-    str: Confidence interval represented as a string.
+    str: Confidence interval (2 values) represented as a string.
     """
     pnew = (p + 1) / 2
     zval = st.norm.ppf(pnew)

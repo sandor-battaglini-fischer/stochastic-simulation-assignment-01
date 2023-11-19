@@ -129,5 +129,12 @@ def plot_time_per_simulation(xmin, xmax, ymin, ymax, max_iter, simulations=10, c
 xmin, xmax, ymin, ymax = -2.0, 1.0, -1.5, 1.5
 max_iter = 1000
 max_samples = 1000000
+
+"""
+    Activate plot_convergence() to generate plots for convergence with increasing samples
+    Activate plot_time_per_simulation() to generate plots for time per simulation with increasing samples
+    
+"""
+
 # plot_convergence(xmin, xmax, ymin, ymax, max_iter, max_samples)
 plot_time_per_simulation(xmin, xmax, ymin, ymax, max_iter)
