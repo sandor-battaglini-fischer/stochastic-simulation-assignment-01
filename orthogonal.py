@@ -4,10 +4,11 @@ import matplotlib.pyplot as plt
 from scipy.stats.qmc import LatinHypercube
 import time
 import os
-from numba import jit
+from numba import jit, prange
+import time
 
 
-@jit
+@jit(nopython=True, parallel=True)
 def mandelbrot(c, max_iter):
     """
     Calculate the Mandelbrot set iteration count for a given complex number.
@@ -29,7 +30,7 @@ def mandelbrot(c, max_iter):
     return n + 1 - np.log(np.log2(abs(z)))
 
 
-@jit
+@jit(nopython=True, parallel=True)
 def mandelbrot_set(xmin, xmax, ymin, ymax, width, height, max_iter):
     """
     Generate a grid representation of the Mandelbrot set.
@@ -59,29 +60,6 @@ def calculate_area(xmin, xmax, ymin, ymax, z, max_iter):
     in_set = z == max_iter
     proportion = np.sum(in_set) / z.size
     return proportion * (xmax - xmin) * (ymax - ymin)
-
-
-@jit
-def random_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
-    """Sample the Mandelbrot set using random sampling."""
-    rng = np.random.default_rng()
-    x_samples = rng.random(n_samples) * (xmax - xmin) + xmin
-    y_samples = rng.random(n_samples) * (ymax - ymin) + ymin
-    z = np.array([mandelbrot(x + 1j*y, max_iter) for x, y in zip(x_samples, y_samples)])
-    area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
-    return x_samples, y_samples, z, area
-
-
-@jit
-def latin_sampling_scipy(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
-    """Sample the Mandelbrot set using Latin hypercube sampling."""
-    sampler = LatinHypercube(d=2)
-    sample = sampler.random(n=n_samples)
-    x_samples = sample[:, 0] * (xmax - xmin) + xmin
-    y_samples = sample[:, 1] * (ymax - ymin) + ymin
-    z = np.array([mandelbrot(x + 1j*y, max_iter) for x, y in zip(x_samples, y_samples)])
-    area = calculate_area(xmin, xmax, ymin, ymax, z, max_iter)
-    return x_samples, y_samples, z, area
 
 
 @jit
@@ -124,51 +102,38 @@ def orthogonal_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter=256):
     return np.array(x_samples), np.array(y_samples), z, area
 
 
-# Sampling configurations
-xmin, xmax, ymin, ymax = -2.0, 1.0, -1.5, 1.5
-n_samples = 1000000
-max_iter = 1000
-width, height = 800, 800
-
-
-def main():
+def calculate_statistics(areas):
     """
-    Main function to visualize the different sampling methods on the.
-
-    This function creates a directory to store images, iterates through each sampling method,
-    visualizes the results, measures the time taken by each method, and saves the images.
-
+    Calculate statistical measures including confidence bounds.
     """
+    mean = np.mean(areas)
+    variance = np.var(areas)
+    std_dev = np.sqrt(variance)
+    conf_interval = 1.96 * std_dev / np.sqrt(len(areas))  # 95% confidence interval
 
-    # Create directory to store images
-    directory_path = "/Users/sandor/dev/Computational Science/stochastic-simulation/stochastic-simulation-assignment-01/images"
-    os.makedirs(directory_path, exist_ok=True)
+    lower_bound = mean - conf_interval
+    upper_bound = mean + conf_interval
 
-    methods = {
-        'Random Sampling': random_sampling,
-        'Latin Hypercube Sampling': latin_sampling_scipy,
-        'Orthogonal Sampling': orthogonal_sampling,
+    return {
+        'mean': mean,
+        'variance': variance,
+        'standard_deviation': std_dev,
+        'confidence_interval': conf_interval,
+        'lower_bound': lower_bound,
+        'upper_bound': upper_bound
     }
 
-    # Iterate through each sampling method and visualize the results
-    for method_name, method_function in methods.items():
-        plt.figure(figsize=(9, 9))
-        x, y, z_set = mandelbrot_set(xmin, xmax, ymin, ymax, width, height, max_iter)
-        plt.pcolormesh(x, y, z_set.T, cmap='hot', shading='auto')
 
-        # Measure the time taken by each sampling method
-        start_time = time.time()
-        x_samples, y_samples, z, area = method_function(xmin, xmax, ymin, ymax, n_samples, max_iter)
-        elapsed_time = time.time() - start_time
-        print(f"Method: {method_name}, Area: {area}, Time: {elapsed_time:.2f} seconds")
+xmin, xmax, ymin, ymax = -2.0, 1.0, -1.5, 1.5
+n_samples = 100000000
+max_iter = 1000000
 
-        # Scatter plot of samples over the Mandelbrot set
-        plt.scatter(x_samples, y_samples, color='white', s=1, alpha=0.5)
-        plt.title(f"{method_name} - Mandelbrot Set Sampling\nArea: {area:.4f}, Samples: {n_samples}, Time: {elapsed_time:.2f} seconds")
-        plt.xlabel("Real")
-        plt.ylabel("Imaginary")
-        plt.savefig(f"images/{method_name}.png", dpi=300)
-
-
-if __name__ == '__main__':
-    main()
+time_start = time.time()
+x_samples, y_samples, z, area = orthogonal_sampling(xmin, xmax, ymin, ymax, n_samples, max_iter)
+stats = calculate_statistics(z == max_iter)
+print(f"Area: {area:.20f}")
+print("Samples:", n_samples)
+print("Iterations:", max_iter)
+print("Time:", time.time() - time_start)
+print(stats)
+ 

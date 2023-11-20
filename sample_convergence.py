@@ -5,7 +5,7 @@ import csv
 import matplotlib.pyplot as plt
 import seaborn as sns
 from methods import random_sampling, latin_sampling_scipy as LHS, orthogonal_sampling
-# from antithetic import antithetic_random_sampling as ARS, antithetic_latin_sampling as ALS, antithetic_orthogonal_sampling as AOS
+from antithetic import antithetic_random_sampling as ARS, antithetic_latin_sampling as ALS, antithetic_orthogonal_sampling as AOS
 from methods import xmax, xmin, ymax, ymin, n_samples, max_iter
 import time
 
@@ -35,7 +35,7 @@ sns.set(style="whitegrid")
 colors = sns.color_palette("pastel")
 
 
-def plot_convergence(xmin, xmax, ymin, ymax, max_iter, max_samples, simulations=10, conf_level=0.95, colors=None):
+def plot_convergence(xmin, xmax, ymin, ymax, max_iter, max_samples, simulations=30, conf_level=0.95, colors=None):
     plt.rcParams.update({"text.usetex": True, "font.family": "serif", "font.serif": ["Palatino"]})
 
 
@@ -45,10 +45,11 @@ def plot_convergence(xmin, xmax, ymin, ymax, max_iter, max_samples, simulations=
     sampling_methods = {
         'Random Sampling': random_sampling,
         'Latin Hypercube Sampling': LHS,
-        'Orthogonal Sampling': orthogonal_sampling
+        'Orthogonal Sampling': orthogonal_sampling,
+        # 'Antithetic Orthogonal Sampling': AOS
     }
 
-    sample_sizes = np.logspace(2, 6, num=10, base=10, dtype=int)
+    sample_sizes = np.logspace(2, 6, num=30, base=10, dtype=int)
 
     plt.figure(figsize=(12, 8))
 
@@ -94,7 +95,8 @@ def plot_time_per_simulation(xmin, xmax, ymin, ymax, max_iter, simulations=10, c
     sampling_methods = {
         'Random Sampling': random_sampling,
         'Latin Hypercube Sampling': LHS,
-        'Orthogonal Sampling': orthogonal_sampling
+        'Orthogonal Sampling': orthogonal_sampling,
+        # 'Antithetic Orthogonal Sampling': AOS
     }
 
     sample_sizes = np.logspace(2, 4, num=100, base=10, dtype=int)
@@ -136,5 +138,5 @@ max_samples = 1000000
     
 """
 
-# plot_convergence(xmin, xmax, ymin, ymax, max_iter, max_samples)
-plot_time_per_simulation(xmin, xmax, ymin, ymax, max_iter)
+plot_convergence(xmin, xmax, ymin, ymax, max_iter, max_samples)
+# plot_time_per_simulation(xmin, xmax, ymin, ymax, max_iter)
