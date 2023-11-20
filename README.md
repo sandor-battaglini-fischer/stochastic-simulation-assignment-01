@@ -23,6 +23,9 @@ In `sample_convergence.py`, the focus is on analyzing the convergence behavior o
 ### `iteration_convergence.py`
 Analogous to `sample_convergence.py` This file examines the convergence properties in relation to the number of iterations, keeping the sample size constant.
 
+###  `viewer.py`
+This file has the ability to visualise the fractal in different colormaps and can zoom in on specific areas. It's purely for visualisation purposes and has no use for the calculations.
+
 ### `orthogonal.py`
 `orthogonal.py` is a file to play around with and was created to run the simulation at the highest settings.
 
