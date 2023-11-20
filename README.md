@@ -1,4 +1,4 @@
-# Stochastic Simulation Assignment 01
+# Stochastic Simulation Assignment 01 - Calculating the area of the Mandelbrot set
 
 ### License:
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
