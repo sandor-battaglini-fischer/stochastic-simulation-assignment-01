@@ -9,7 +9,7 @@ This repository contains Python scripts developed for a the first assignment of 
 ## File Descriptions
 
 ### `methods.py`
-This file includes the core methodss used in this project. It contains the implementation of the basic Mandelbrot iteration, functions to calculate the area and the three basic sampling techniques. It serves as the backbone for the simulations in other scripts and run by itself it creates plots of the fractals and where each sample lands for each sampling method.
+This file includes the core methods used in this project. It contains the implementation of the basic Mandelbrot iteration, functions to calculate the area and the three basic sampling techniques. It serves as the backbone for the simulations in other scripts and run by itself it creates plots of the fractals and where each sample lands for each sampling method.
 
 ### `antithetic.py`
 `antithetic.py` implements the antithetic equivalents of the sampling techniques, which is a variance reduction method in stochastic simulation. Otherwise, it has the same functionality as `methods.py`.
