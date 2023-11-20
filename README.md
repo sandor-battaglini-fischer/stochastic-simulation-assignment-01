@@ -6,7 +6,7 @@
 ## Overview
 This repository contains Python scripts developed for a the first assignment of Stochastic Simulation at the University of Amsterdam, 2023. The project focuses on the calculation of the area of the Mandelbrot set using Monte Carlo methods.
 
-## Files Description
+## File Descriptions
 
 ### `methods.py`
 This file includes the core methodss used in this project. It contains the implementation of the basic Mandelbrot iteration, functions to calculate the area and the three basic sampling techniques. It serves as the backbone for the simulations in other scripts and run by itself it creates plots of the fractals and where each sample lands for each sampling method.
