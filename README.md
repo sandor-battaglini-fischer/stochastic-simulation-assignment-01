@@ -33,13 +33,13 @@ This file has the ability to visualise the fractal in different colormaps and ca
 These scripts were run with Python 3.11.0 on MacOS Ventura. 
 
 ### Requirements:
-matplotlib==3.7.1
-numba==0.57.0
-numpy==1.24.3
-pandas==1.5.3
-scipy==1.10.1
-seaborn==0.13.0
-statsmodels==0.14.0
+* matplotlib==3.7.1
+* numba==0.57.0
+* numpy==1.24.3
+* pandas==1.5.3
+* scipy==1.10.1
+* seaborn==0.13.0
+* statsmodels==0.14.0
 
 ## Contact
 joana.costaesilva@student.uva.nl
