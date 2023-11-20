@@ -1,5 +1,8 @@
 # Stochastic Simulation Assignment 01
 
+### License:
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Overview
 This repository contains Python scripts developed for a the first assignment of Stochastic Simulation at the University of Amsterdam, 2023. The project focuses on the calculation of the area of the Mandelbrot set using Monte Carlo methods.
 
